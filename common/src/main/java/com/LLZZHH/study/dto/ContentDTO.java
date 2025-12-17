@@ -1,7 +1,5 @@
 package com.llzzhh.study.dto;
 
-
-import com.llzzhh.study.entity.Comment;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -19,13 +17,10 @@ public class ContentDTO {
     private Boolean isLiked;
 
     private String commentText;
-    private List<Comment> comments;
+    private List<CommentDTO> comments;
 
     private List<String> uploadedImages;
     private List<String> usedImages;
-    // 分页相关字段
     private Integer page;
     private Integer pageSize;
-
-
 }
