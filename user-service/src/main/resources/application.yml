@@ -1,2 +1,37 @@
+
+spring:
+    application:
+        name: user-service
+    cloud:
+        nacos:
+            discovery:
+                server-addr: localhost:8848
+    datasource:
+        url: jdbc:mysql://localhost:3306/user2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+        username: root
+        password: Lzh20050318!
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    security:
+        user:
+            name: admin
+            password: password
+    servlet:
+        multipart:
+            max-file-size: 20MB
+            max-request-size: 250MB
+            enabled: true
 server:
-  port: 9990
+    port: 8101
+mybatis-plus:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+jwt:
+    secret: your-secret-key-must-be-at-least-256-bits-long
+    expiration: 86400000
+logging:
+    charset:
+        console: utf-8
+app:
+    upload:
+        dir: D:/IDEA/java/micro-pictures
+        url-path: /api/upfile

@@ -1,14 +1,13 @@
-package com.llzzhh.study.userservice;
+package com.llzzhh.study.squareservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-
-public class UserServiceApplication {
+public class SquareServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(UserServiceApplication.class, args);
+        SpringApplication.run(SquareServiceApplication.class, args);
     }
 
 }

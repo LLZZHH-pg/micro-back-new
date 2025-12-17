@@ -1,14 +1,16 @@
 package com.llzzhh.study.userservice.service.impl;
 
-import com.llzzhh.study.mapper.UserMapper;
+import com.llzzhh.study.userservice.mapper.UserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.llzzhh.study.dto.LoginDTO;
 import com.llzzhh.study.dto.RegisterDTO;
-import com.llzzhh.study.entity.User;
+import com.llzzhh.study.userservice.entity.User;
 
 import com.llzzhh.study.userservice.service.UserService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

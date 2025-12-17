@@ -1,4 +1,4 @@
-package com.llzzhh.study.entity;
+package com.llzzhh.study.userservice.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

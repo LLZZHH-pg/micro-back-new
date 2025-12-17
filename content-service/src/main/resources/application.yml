@@ -1,2 +1,21 @@
+
+spring:
+    application:
+        name: content-service
+    cloud:
+        nacos:
+            discovery:
+                server-addr: localhost:8848
+    datasource:
+        url: jdbc:mysql://localhost:3306/user2?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+        username: root
+        password: Lzh20050318!
+        driver-class-name: com.mysql.cj.jdbc.Driver
 server:
-    port: 9991
+    port: 8102
+mybatis-plus:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+logging:
+    charset:
+        console: utf-8

@@ -1,0 +1,13 @@
+
+spring:
+    application:
+        name: gateway-service
+    cloud:
+        nacos:
+            discovery:
+                server-addr: localhost:8848
+server:
+    port: 7395
+logging:
+    charset:
+        console: utf-8
