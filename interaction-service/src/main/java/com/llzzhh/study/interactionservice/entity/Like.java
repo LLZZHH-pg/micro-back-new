@@ -1,4 +1,4 @@
-package com.llzzhh.study.entity;
+package com.llzzhh.study.interactionservice.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
