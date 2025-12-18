@@ -26,7 +26,6 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -77,18 +76,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .parseClaimsJws(token)
                     .getBody();
 
-            // 从claims中获取用户信息
-            String userId = claims.getSubject();
 
             // 从claim中获取JwtUserDTO
-            Map<String, Object> userClaim = claims.get("user", Map.class);
+            Object userClaim = claims.get("user");
+            if (userClaim == null) {
+                throw new MalformedJwtException("JWT token missing user claim");
+            }
             JwtUserDTO jwtUser = objectMapper.convertValue(userClaim, JwtUserDTO.class);
 
             if (jwtUser != null) {
                 logger.info("Authenticating user: " + jwtUser.getUid() + " with default role");
-
-                // 设置权限
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
                 // 使用JwtUserDTO作为principal
                 UsernamePasswordAuthenticationToken authentication =
@@ -100,8 +97,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // 将用户ID放入请求属性，便于后续服务使用
-                request.setAttribute("userId", userId);
                 request.setAttribute("jwtUser", jwtUser);
 
                 logger.debug("Authentication set for user: " + jwtUser.getUid());
