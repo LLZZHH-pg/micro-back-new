@@ -20,4 +20,7 @@ public class User {
 
     @TableField("PAS")
     private String password;
+
+    @TableField("ROL")
+    private String role;
 }

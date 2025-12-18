@@ -14,8 +14,5 @@ public interface ContentService {
     void updateContentState(String id, String state);
     void deleteContent(String id);
     String uploadFile(MultipartFile file);
-    void likeContent(String id);
-    void commentContent(String contentId, String commentText);
-
 
 }

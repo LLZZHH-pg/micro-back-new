@@ -1,7 +1,7 @@
 package com.llzzhh.study.gatewayservice.filter;
 
-import com.llzzhh.study.entity.User;
-import com.llzzhh.study.mapper.UserMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.llzzhh.study.dto.JwtUserDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -26,7 +26,7 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -34,27 +34,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final UserMapper userMapper;
-
     @Value("${jwt.secret}")
     private String jwtSecret;
 
     private SecretKey secretKey;
+    private final ObjectMapper objectMapper;
 
-    public JwtAuthenticationFilter(UserMapper userMapper) {
-        this.userMapper = userMapper;
+    public JwtAuthenticationFilter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
-//    @PostConstruct
-//    public void init() {
-//        try {
-//            this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-//            logger.info("JWT secret key initialized successfully");
-//        } catch (Exception e) {
-//            logger.error("Failed to initialize JWT secret key", e);
-//            throw new RuntimeException("JWT configuration error", e);
-//        }
-//    }
     @PostConstruct
     public void init() {
         try {
@@ -81,51 +70,53 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-          //SecretKey secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
             // 验证并解析Token
-//            if (secretKey == null) {
-//                secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-//            }
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
 
-            // 获取用户ID
+            // 从claims中获取用户信息
             String userId = claims.getSubject();
-            User user = userMapper.selectById(userId);
 
-            if (user != null) {
-                // 添加日志确认用户信息
-                logger.info("Authenticating user: " + user.getUid() + " with default role");
+            // 从claim中获取JwtUserDTO
+            Map<String, Object> userClaim = claims.get("user", Map.class);
+            JwtUserDTO jwtUser = objectMapper.convertValue(userClaim, JwtUserDTO.class);
 
-                // 确保权限名称正确（使用 ROLE_USER）
-                List<SimpleGrantedAuthority> authorities =
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+            if (jwtUser != null) {
+                logger.info("Authenticating user: " + jwtUser.getUid() + " with default role");
 
+                // 设置权限
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+
+                // 使用JwtUserDTO作为principal
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(user, null, authorities);
+                        new UsernamePasswordAuthenticationToken(jwtUser, null,
+                                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // 添加调试日志
-                logger.debug("Authentication set for user: " + user.getUid());
+                // 将用户ID放入请求属性，便于后续服务使用
+                request.setAttribute("userId", userId);
+                request.setAttribute("jwtUser", jwtUser);
+
+                logger.debug("Authentication set for user: " + jwtUser.getUid());
             }
         } catch (ExpiredJwtException e) {
             logger.error("JWT token expired", e);
-            sendError(response, request,"Token已过期", HttpStatus.UNAUTHORIZED.value());
-            return; // 停止过滤器链
+            sendError(response, request, "Token已过期", HttpStatus.UNAUTHORIZED.value());
+            return;
         } catch (MalformedJwtException | SecurityException e) {
             logger.error("Invalid JWT token", e);
-            sendError(response, request,"无效的Token", HttpStatus.FORBIDDEN.value());
+            sendError(response, request, "无效的Token", HttpStatus.FORBIDDEN.value());
             return;
         } catch (Exception e) {
             logger.error("JWT token validation failed", e);
-            sendError(response, request,"Token验证失败", HttpStatus.FORBIDDEN.value());
+            sendError(response, request, "Token验证失败", HttpStatus.FORBIDDEN.value());
             return;
         }
 

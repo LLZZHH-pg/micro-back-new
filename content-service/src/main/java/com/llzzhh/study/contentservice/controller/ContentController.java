@@ -49,16 +49,6 @@ public class ContentController {
         return ResultVO.ok(contentService.uploadFile(file));
     }
 
-    @PostMapping("/contents/like")
-    public ResultVO<Void> likeContent(@RequestBody ContentDTO contentDTO) {
-        contentService.likeContent(contentDTO.getContentId());
-        return ResultVO.ok(null);
-    }
-    @PostMapping("/contents/comment")
-    public ResultVO<Void> commentContent(@RequestBody ContentDTO contentDTO) {
-        contentService.commentContent(contentDTO.getContentId(), contentDTO.getCommentText());
-        return ResultVO.ok(null);
-    }
 
 
 }

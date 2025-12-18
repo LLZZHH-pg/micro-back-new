@@ -1,5 +1,6 @@
 package com.llzzhh.study.userservice.service.impl;
 
+import com.llzzhh.study.dto.JwtUserDTO;
 import com.llzzhh.study.userservice.mapper.UserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -89,12 +90,22 @@ public class UserServiceimpl implements UserService {
         }
 
         // 生成JWT令牌
-        return generateJwtToken(String.valueOf(user.getUid()));
+        return generateJwtToken(user);
     }
-    private String generateJwtToken(String userId) {
+
+    private String generateJwtToken(User user) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+
+        // 创建JwtUserDTO
+        JwtUserDTO jwtUser = new JwtUserDTO();
+        jwtUser.setUid(user.getUid());
+        jwtUser.setName(user.getName());
+        jwtUser.setEmail(user.getEmail());
+        jwtUser.setRole(user.getRole());
+
         return Jwts.builder()
-                .setSubject(userId)
+                .setSubject(String.valueOf(user.getUid()))
+                .claim("user", jwtUser)  // 将用户信息存入JWT
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(key)

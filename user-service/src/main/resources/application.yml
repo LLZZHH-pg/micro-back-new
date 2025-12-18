@@ -13,25 +13,17 @@ spring:
         driver-class-name: com.mysql.cj.jdbc.Driver
     security:
         user:
-            name: admin
+            name: visitor
             password: password
-    servlet:
-        multipart:
-            max-file-size: 20MB
-            max-request-size: 250MB
-            enabled: true
+
 server:
     port: 8101
-mybatis-plus:
-    configuration:
-        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 jwt:
     secret: your-secret-key-must-be-at-least-256-bits-long
     expiration: 86400000
+mybatis-plus:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 logging:
     charset:
         console: utf-8
-app:
-    upload:
-        dir: D:/IDEA/java/micro-pictures
-        url-path: /api/upfile

@@ -1,1 +1,18 @@
-spring.application.name=interaction-service
+
+spring:
+    application:
+        name: interaction-service
+    cloud:
+        nacos:
+            discovery:
+                server-addr: localhost:8848
+
+server:
+    port: 8104
+
+mybatis-plus:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+logging:
+    charset:
+        console: utf-8
