@@ -66,7 +66,7 @@ public class UserController {
             Map<String, Object> userProfile = new HashMap<>();
             userProfile.put("uid", user.getUid());
             userProfile.put("name", user.getName());
-            userProfile.put("sta", user.getSta()); // 用户状态字段
+            userProfile.put("sta", user.getState()); // 用户状态字段
             userProfile.put("email", user.getEmail());
             // 添加其他需要的字段...
 
@@ -90,7 +90,7 @@ public class UserController {
                 Map<String, Object> userInfo = new HashMap<>();
                 userInfo.put("uid", user.getUid());
                 userInfo.put("name", user.getName());
-                userInfo.put("sta", user.getSta());
+                userInfo.put("sta", user.getState());
                 result.put(user.getUid(), userInfo);
             }
 
