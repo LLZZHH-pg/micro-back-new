@@ -46,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
         return comments.stream()
                 .filter(comment -> {
                     Map<String, Object> userInfo = usersMap.get(comment.getUserId());
-                    return userInfo != null && "正常".equals(userInfo.get("sta"));
+                    return userInfo != null && "normal".equals(userInfo.get("state"));
                 })
                 .map(comment -> {
                     CommentDTO dto = toDTO(comment);

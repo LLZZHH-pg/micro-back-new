@@ -90,7 +90,7 @@ public class UserController {
                 Map<String, Object> userInfo = new HashMap<>();
                 userInfo.put("uid", user.getUid());
                 userInfo.put("name", user.getName());
-                userInfo.put("sta", user.getState());
+                userInfo.put("state", user.getState());
                 result.put(user.getUid(), userInfo);
             }
 

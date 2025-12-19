@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface ContentService {
     List<ContentDTO> getContentsOrdered(int page, int size);
+    List<ContentDTO> getSquareContents(int page, int size);
 
     void saveContent(ContentDTO dto);
     boolean deleteFile(String fileUrl);
@@ -15,5 +16,5 @@ public interface ContentService {
     void deleteContent(String id);
     String uploadFile(MultipartFile file);
 
-    void updateLikes(String contentId, int increment);
+    void updateLikes(String id, int increment);
 }

@@ -54,6 +54,9 @@ public class ContentController {
         return ResultVO.ok(contentService.uploadFile(file));
     }
 
-
+    @GetMapping("/contentsSquare")
+    public ResultVO<List<ContentDTO>> getContentsSquare(@RequestParam (defaultValue = "1") int page , @RequestParam (defaultValue = "10") int pageSize) {
+        return ResultVO.ok(contentService.getSquareContents(page, pageSize));
+    }
 
 }

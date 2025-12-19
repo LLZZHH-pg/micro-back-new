@@ -48,7 +48,17 @@ public class ContentServiceImpl implements ContentService {
     public List<ContentDTO> getContentsOrdered(int page, int size) {
         int offset = (page - 1) * size;
 
-        // 批量查询内容
+        List<Content> contents = contentMapper.selectContentWithUserid(getCurrentUserId(),offset, size);
+        return contents.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+    }
+    @Override
+    public List<ContentDTO> getSquareContents(int page, int size) {
+        int offset = (page - 1) * size;
+
+        // 查询公开内容（仅public状态）
         List<Content> contents = contentMapper.selectSquareContentsWithUsername(offset, size);
 
         // 收集所有用户ID
@@ -60,13 +70,13 @@ public class ContentServiceImpl implements ContentService {
         // 批量获取用户信息
         Map<Integer, Map<String, Object>> usersMap = getUsersBatch(userIds);
 
-        // 过滤并转换DTO
+        // 过滤状态为"normal"的用户内容
         return contents.stream()
                 .filter(content -> {
-                    // 检查用户状态是否为"normal"
                     Map<String, Object> userInfo = usersMap.get(content.getUserId());
                     if (userInfo == null) return false;
-                    return "normal".equals(userInfo.get("sta"));
+                    String userState = (String) userInfo.get("state");
+                    return "normal".equals(userState);
                 })
                 .map(content -> {
                     ContentDTO dto = convertToDTO(content);
@@ -208,11 +218,12 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void updateLikes(String contentId, int increment) {
-        UpdateWrapper<Content> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", contentId)
-                .setSql("likes = likes + " + increment);
-        contentMapper.update(null, updateWrapper);
+    public void updateLikes(String id, int increment) {
+        try {
+            contentMapper.updateLikes(id, increment);
+        } catch (Exception e) {
+            throw new RuntimeException("更新点赞失败: " + e.getMessage(), e);
+        }
     }
 
     private String getString(MultipartFile file) {

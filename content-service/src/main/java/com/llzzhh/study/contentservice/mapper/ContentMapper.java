@@ -23,7 +23,7 @@ public interface ContentMapper extends BaseMapper<Content> {
             "AND c.state IN ('private','public','save') " +
             "ORDER BY c.time DESC " +
             "LIMIT #{offset}, #{size}")
-    List<Content> selectContentWithUsername(@Param("userId") Integer userId,
+    List<Content> selectContentWithUserid(@Param("userId") Integer userId,
                                             @Param("offset") int offset,
                                             @Param("size") int size);
 
@@ -44,5 +44,5 @@ public interface ContentMapper extends BaseMapper<Content> {
     );
 
     @Update("UPDATE content SET likes = likes + #{increment} WHERE id = #{contentId}")
-    int updateLikes(@Param("contentId") String contentId, @Param("increment") int increment);
+    void updateLikes(@Param("contentId") String contentId, @Param("increment") int increment);
 }
