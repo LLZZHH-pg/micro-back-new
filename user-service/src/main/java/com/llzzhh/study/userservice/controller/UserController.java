@@ -99,29 +99,4 @@ public class UserController {
             return ResultVO.serverError("批量获取用户信息失败");
         }
     }
-//    @PutMapping("/profile")
-//    public ResultVO<String> updateProfile(@RequestBody User updateUser) {
-//        try {
-//            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//            if (auth == null || auth.getPrincipal() == null) {
-//                return ResultVO.unauthorized("用户未登录");
-//            }
-//            User currentUser = (User) auth.getPrincipal();
-//            updateUser.setUid(currentUser.getUid());
-//            userService.updateProfile(updateUser);
-//            return ResultVO.ok("更新成功");
-//        } catch (Exception e) {
-//            return ResultVO.fail(e.getMessage());
-//        }
-//    }
-
-//    @PostMapping("/logout")
-//    public ResultVO<String> logout() {
-//        try {
-//            SecurityContextHolder.clearContext();
-//            return ResultVO.ok("退出登录成功");
-//        } catch (Exception e) {
-//            return ResultVO.serverError("退出登录失败");
-//        }
-//    }
 }
