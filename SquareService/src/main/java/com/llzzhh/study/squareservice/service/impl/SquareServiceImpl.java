@@ -5,8 +5,6 @@ import com.llzzhh.study.squareservice.service.SquareService;
 import com.llzzhh.study.dto.ContentDTO;
 import com.llzzhh.study.vo.ResultVO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
