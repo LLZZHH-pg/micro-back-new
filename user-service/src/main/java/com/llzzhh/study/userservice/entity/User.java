@@ -23,4 +23,7 @@ public class User {
 
     @TableField("ROL")
     private String role;
+
+    @TableField("STA")
+    private String state;
 }

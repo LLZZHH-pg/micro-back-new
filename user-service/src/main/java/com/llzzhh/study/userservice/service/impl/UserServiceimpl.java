@@ -12,14 +12,18 @@ import com.llzzhh.study.userservice.entity.User;
 import com.llzzhh.study.userservice.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceimpl implements UserService {
 
     @Value("${jwt.secret}")
@@ -29,9 +33,6 @@ public class UserServiceimpl implements UserService {
     private long jwtExpirationMs;
 
     private final UserMapper userMapper;
-    public UserServiceimpl(UserMapper userMapper) {
-        this.userMapper = userMapper;
-    }
 
     @Override
     public String register(RegisterDTO dto) {
@@ -156,5 +157,18 @@ public class UserServiceimpl implements UserService {
         if (name.length() < 2 || name.length() > 10 || !name.matches(".*[a-zA-Z].*")) {
             throw new RuntimeException("用户名在2~10个字符之间，且包含至少一个字母");
         }
+    }
+
+    @Override
+    public User getUserById(Integer userId) {
+        return userMapper.selectById(userId);
+    }
+
+    @Override
+    public List<User> getUsersByIds(List<Integer> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userMapper.selectBatchIds(userIds);
     }
 }

@@ -42,6 +42,11 @@ public class ContentController {
         return ResultVO.ok(null);
     }
 
+    @PostMapping("/contents/updateLikes")
+    public ResultVO<Void> updateLikes(@RequestParam String contentId, @RequestParam int increment) {
+        contentService.updateLikes(contentId, increment);
+        return ResultVO.ok(null);
+    }
 
     // 文件上传
     @PostMapping("/upload")

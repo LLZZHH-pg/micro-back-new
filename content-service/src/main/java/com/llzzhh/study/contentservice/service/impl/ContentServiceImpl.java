@@ -1,17 +1,16 @@
 package com.llzzhh.study.contentservice.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 
+import com.llzzhh.study.contentservice.feign.InteractionFeign;
+import com.llzzhh.study.contentservice.feign.UserFeign;
 import com.llzzhh.study.contentservice.service.ContentService;
+import com.llzzhh.study.dto.CommentDTO;
 import com.llzzhh.study.dto.ContentDTO;
 import com.llzzhh.study.dto.JwtUserDTO;
-import com.llzzhh.study.entity.Comment;
 import com.llzzhh.study.contentservice.entity.Content;
-import com.llzzhh.study.entity.Like;
-import com.llzzhh.study.mapper.CommentMapper;
 import com.llzzhh.study.contentservice.mapper.ContentMapper;
-import com.llzzhh.study.mapper.LikeMapper;
+import com.llzzhh.study.vo.ResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -24,7 +23,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,8 +34,8 @@ import java.util.stream.Collectors;
 public class ContentServiceImpl implements ContentService {
 
     private final ContentMapper contentMapper;
-    private final LikeMapper likeMapper;
-    private final CommentMapper commentMapper;
+    private final InteractionFeign interactionFeign;
+    private final UserFeign userFeign;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -42,17 +43,64 @@ public class ContentServiceImpl implements ContentService {
     @Value("${app.upload.url-path}")
     private String urlPath;
 
+
     @Override
     public List<ContentDTO> getContentsOrdered(int page, int size) {
         int offset = (page - 1) * size;
-        List<Content> contents = contentMapper.selectContentWithUsername(
-                getCurrentUserId(), offset, size
-        );
+
+        // 批量查询内容
+        List<Content> contents = contentMapper.selectSquareContentsWithUsername(offset, size);
+
+        // 收集所有用户ID
+        List<Integer> userIds = contents.stream()
+                .map(Content::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 批量获取用户信息
+        Map<Integer, Map<String, Object>> usersMap = getUsersBatch(userIds);
+
+        // 过滤并转换DTO
         return contents.stream()
-                .map(this::convertToDTO)
+                .filter(content -> {
+                    // 检查用户状态是否为"normal"
+                    Map<String, Object> userInfo = usersMap.get(content.getUserId());
+                    if (userInfo == null) return false;
+                    return "normal".equals(userInfo.get("sta"));
+                })
+                .map(content -> {
+                    ContentDTO dto = convertToDTO(content);
+                    // 设置用户名
+                    Map<String, Object> userInfo = usersMap.get(content.getUserId());
+                    if (userInfo != null) {
+                        dto.setUsername((String) userInfo.get("name"));
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
+    private Map<Integer, Map<String, Object>> getUsersBatch(List<Integer> userIds) {
+        if (userIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        try {
+            // 将用户ID列表转换为逗号分隔的字符串
+            String idsStr = userIds.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+
+            ResultVO<Map<Integer, Map<String, Object>>> result = userFeign.getUsersBatch(idsStr);
+            if (result != null && result.getCode() == 200 && result.getData() != null) {
+                return result.getData();
+            }
+        } catch (Exception e) {
+            System.err.println("获取用户信息失败: " + e.getMessage());
+        }
+
+        return new HashMap<>();
+    }
 
     @Override
     public void saveContent(ContentDTO dto) {
@@ -106,17 +154,9 @@ public class ContentServiceImpl implements ContentService {
 
     @Override
     public void updateContentState(String id, String state) {
-//        Content content = new Content();
         if (id == null || id.isBlank() || "undefined".equals(id) || "null".equals(id)) {
             throw new IllegalArgumentException("无效的内容ID");
         }
-//        content.setId(id);
-//        content.setState(state);
-        // 条件更新：仅更新当前用户的内容
-//        UpdateWrapper<Content> updateWrapper = new UpdateWrapper<>();
-//        updateWrapper.eq("id", id)
-//                .eq("uid", getCurrentUserId());
-//        contentMapper.update(content, updateWrapper);
         try {
             UpdateWrapper<Content> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("id", id)
@@ -145,7 +185,6 @@ public class ContentServiceImpl implements ContentService {
     }
 
 
-
     @Override
     public String uploadFile(MultipartFile file) {
         try {
@@ -166,6 +205,14 @@ public class ContentServiceImpl implements ContentService {
         } catch (Exception e) {
             throw new RuntimeException("未知错误: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void updateLikes(String contentId, int increment) {
+        UpdateWrapper<Content> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", contentId)
+                .setSql("likes = likes + " + increment);
+        contentMapper.update(null, updateWrapper);
     }
 
     private String getString(MultipartFile file) {
@@ -216,14 +263,38 @@ public class ContentServiceImpl implements ContentService {
         ContentDTO dto = new ContentDTO();
         dto.setContentId(content.getContentId());
         dto.setUserId(content.getUserId());
-        dto.setUsername(content.getUsername());
         dto.setContent(content.getContent());
         dto.setState(content.getState());
-        dto.setCreateTime(content.getCreateTime()); // 修正字段名
+        dto.setCreateTime(content.getCreateTime());
         dto.setLikes(content.getLikes());
-        dto.setIsLiked(isLike(content.getContentId()));
-        List<Comment> comments = commentMapper.selectCommentsWithUsername(content.getContentId());
-        dto.setComments(comments);
+
+        try {
+            // 获取评论（第一页，前10条）
+            Map<String, Object> commentsResult = interactionFeign
+                    .getCommentsByContentId(content.getContentId(), 1, 10)
+                    .getData();
+
+            if (commentsResult != null && commentsResult.get("comments") != null) {
+                @SuppressWarnings("unchecked")
+                List<CommentDTO> comments = (List<CommentDTO>) commentsResult.get("comments");
+                dto.setComments(comments);
+            } else {
+                dto.setComments(List.of());
+            }
+
+            // 检查当前用户是否点赞
+            Boolean isLiked = interactionFeign
+                    .checkIsLiked(content.getContentId(), getCurrentUserId())
+                    .getData();
+            dto.setIsLiked(isLiked != null ? isLiked : false);
+        } catch (Exception e) {
+            // 如果调用失败，设置为默认值
+            dto.setComments(List.of());
+            dto.setIsLiked(false);
+            // 记录错误但不中断流程
+            System.err.println("调用interaction服务失败: " + e.getMessage());
+        }
+
         return dto;
     }
 

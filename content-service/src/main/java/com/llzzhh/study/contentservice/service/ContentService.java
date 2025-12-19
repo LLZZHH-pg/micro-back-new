@@ -15,4 +15,5 @@ public interface ContentService {
     void deleteContent(String id);
     String uploadFile(MultipartFile file);
 
+    void updateLikes(String contentId, int increment);
 }

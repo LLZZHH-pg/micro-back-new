@@ -5,6 +5,7 @@ import com.llzzhh.study.contentservice.entity.Content;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -16,10 +17,8 @@ public interface ContentMapper extends BaseMapper<Content> {
             "c.content, " +
             "c.time AS createTime, " +
             "c.state, " +
-            "c.likes, " +
-            "u.NAM AS username " +
+            "c.likes " +
             "FROM content c " +
-            "JOIN user_info u ON c.uid = u.UID " +
             "WHERE c.uid = #{userId} " +
             "AND c.state IN ('private','public','save') " +
             "ORDER BY c.time DESC " +
@@ -34,16 +33,16 @@ public interface ContentMapper extends BaseMapper<Content> {
             "c.content, " +
             "c.time AS createTime, " +
             "c.state, " +
-            "c.likes, " +
-            "u.NAM AS username " +
+            "c.likes " +
             "FROM content c " +
-            "JOIN user_info u ON c.uid = u.UID " +
             "WHERE c.state IN ('public') " +
-            "AND u.STA = '正常' " +
             "ORDER BY c.likes DESC, c.time DESC " +
             "LIMIT #{offset}, #{size}")
     List<Content> selectSquareContentsWithUsername(
             @Param("offset") int offset,
             @Param("size") int size
     );
+
+    @Update("UPDATE content SET likes = likes + #{increment} WHERE id = #{contentId}")
+    int updateLikes(@Param("contentId") String contentId, @Param("increment") int increment);
 }

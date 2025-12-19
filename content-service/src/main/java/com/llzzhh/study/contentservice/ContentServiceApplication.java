@@ -1,11 +1,11 @@
 package com.llzzhh.study.contentservice;
 
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@MapperScan("com.llzzhh.study.mapper")
+@EnableFeignClients
 public class ContentServiceApplication {
 
     public static void main(String[] args) {
