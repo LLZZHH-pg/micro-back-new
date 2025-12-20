@@ -1,7 +1,7 @@
 package com.llzzhh.study.userservice.service;
 
-import com.llzzhh.study.dto.LoginDTO;
-import com.llzzhh.study.dto.RegisterDTO;
+import com.LLZZHH.study.dto.LoginDTO;
+import com.LLZZHH.study.dto.RegisterDTO;
 import com.llzzhh.study.userservice.entity.User;
 
 import java.util.List;

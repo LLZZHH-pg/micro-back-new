@@ -1,6 +1,6 @@
 package com.llzzhh.study.contentservice.service;
 
-import com.llzzhh.study.dto.ContentDTO;
+import com.LLZZHH.study.dto.ContentDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

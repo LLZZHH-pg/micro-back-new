@@ -1,7 +1,8 @@
 package com.llzzhh.study.squareservice.service;
 
 
-import com.llzzhh.study.dto.ContentDTO;
+import com.LLZZHH.study.dto.ContentDTO;
+
 import java.util.List;
 
 public interface SquareService {

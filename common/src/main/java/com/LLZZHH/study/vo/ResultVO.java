@@ -1,4 +1,4 @@
-package com.llzzhh.study.vo;
+package com.LLZZHH.study.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

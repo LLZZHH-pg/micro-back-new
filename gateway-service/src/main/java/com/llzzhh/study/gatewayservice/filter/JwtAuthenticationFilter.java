@@ -1,7 +1,7 @@
 package com.llzzhh.study.gatewayservice.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.llzzhh.study.dto.JwtUserDTO;
+import com.LLZZHH.study.dto.JwtUserDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

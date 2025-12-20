@@ -15,7 +15,8 @@
 
         <module>user-service</module>
         <module>content-service</module>
-        <module>SquareService</module>
+        <module>square-service</module>
+        <module>interaction-service</module>
     </modules>
     <properties>
         <java.version>23</java.version>

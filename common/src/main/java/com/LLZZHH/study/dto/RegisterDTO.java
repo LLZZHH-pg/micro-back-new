@@ -1,4 +1,4 @@
-package com.llzzhh.study.dto;
+package com.LLZZHH.study.dto;
 
 import lombok.Data;
 

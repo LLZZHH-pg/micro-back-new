@@ -1,6 +1,6 @@
 package com.llzzhh.study.contentservice.feign;
 
-import com.llzzhh.study.vo.ResultVO;
+import com.LLZZHH.study.vo.ResultVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

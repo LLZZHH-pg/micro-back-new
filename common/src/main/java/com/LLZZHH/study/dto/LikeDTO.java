@@ -1,4 +1,4 @@
-package com.llzzhh.study.dto;
+package com.LLZZHH.study.dto;
 
 import java.time.LocalDateTime;
 public class LikeDTO {

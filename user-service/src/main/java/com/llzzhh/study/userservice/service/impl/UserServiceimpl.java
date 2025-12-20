@@ -1,12 +1,12 @@
 package com.llzzhh.study.userservice.service.impl;
 
-import com.llzzhh.study.dto.JwtUserDTO;
+import com.LLZZHH.study.dto.JwtUserDTO;
 import com.llzzhh.study.userservice.mapper.UserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.llzzhh.study.dto.LoginDTO;
-import com.llzzhh.study.dto.RegisterDTO;
+import com.LLZZHH.study.dto.LoginDTO;
+import com.LLZZHH.study.dto.RegisterDTO;
 import com.llzzhh.study.userservice.entity.User;
 
 import com.llzzhh.study.userservice.service.UserService;

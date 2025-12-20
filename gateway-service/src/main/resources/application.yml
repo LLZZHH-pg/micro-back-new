@@ -6,6 +6,8 @@ spring:
         nacos:
             discovery:
                 server-addr: localhost:8848
+jwt:
+    secret: your-secret-key-must-be-at-least-256-bits-long
 server:
     port: 7395
 logging:

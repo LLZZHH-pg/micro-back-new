@@ -1,8 +1,8 @@
 package com.llzzhh.study.contentservice.controller;
 
 import com.llzzhh.study.contentservice.service.ContentService;
-import com.llzzhh.study.dto.ContentDTO;
-import com.llzzhh.study.vo.ResultVO;
+import com.LLZZHH.study.dto.ContentDTO;
+import com.LLZZHH.study.vo.ResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

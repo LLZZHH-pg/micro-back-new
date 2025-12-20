@@ -1,12 +1,10 @@
 package com.llzzhh.study.contentservice.feign;
 
-import com.llzzhh.study.dto.CommentDTO;
-import com.llzzhh.study.vo.ResultVO;
+import com.LLZZHH.study.vo.ResultVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
 import java.util.Map;
 
 @FeignClient(name = "interaction-service")

@@ -6,7 +6,11 @@ spring:
         nacos:
             discovery:
                 server-addr: localhost:8848
-
+    datasource:
+        url: jdbc:mysql://localhost:3306/micro-interaction?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+        username: root
+        password: Lzh20050318!
+        driver-class-name: com.mysql.cj.jdbc.Driver
 server:
     port: 8104
 

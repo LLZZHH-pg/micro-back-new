@@ -1,10 +1,10 @@
 package com.llzzhh.study.interactionservice.controller;
 
-import com.llzzhh.study.dto.CommentDTO;
-import com.llzzhh.study.dto.ContentDTO;
+import com.LLZZHH.study.dto.CommentDTO;
+import com.LLZZHH.study.dto.ContentDTO;
 import com.llzzhh.study.interactionservice.service.CommentService;
 import com.llzzhh.study.interactionservice.service.LikeService;
-import com.llzzhh.study.vo.ResultVO;
+import com.LLZZHH.study.vo.ResultVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

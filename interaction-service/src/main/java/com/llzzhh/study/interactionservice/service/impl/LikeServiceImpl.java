@@ -1,5 +1,6 @@
 package com.llzzhh.study.interactionservice.service.impl;
 
+import com.LLZZHH.study.dto.JwtUserDTO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.llzzhh.study.interactionservice.feign.ContentFeign;
 import com.llzzhh.study.interactionservice.entity.Like;
@@ -62,8 +63,8 @@ public class LikeServiceImpl implements LikeService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
-            if (principal instanceof com.llzzhh.study.dto.JwtUserDTO) {
-                return ((com.llzzhh.study.dto.JwtUserDTO) principal).getUid();
+            if (principal instanceof JwtUserDTO) {
+                return ((JwtUserDTO) principal).getUid();
             } else {
                 throw new SecurityException("用户信息格式不正确");
             }

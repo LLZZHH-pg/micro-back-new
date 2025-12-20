@@ -1,6 +1,6 @@
 package com.llzzhh.study.interactionservice.service;
 
-import com.llzzhh.study.dto.CommentDTO;
+import com.LLZZHH.study.dto.CommentDTO;
 
 import java.util.List;
 

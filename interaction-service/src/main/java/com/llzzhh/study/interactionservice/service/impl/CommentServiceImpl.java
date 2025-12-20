@@ -1,6 +1,8 @@
 package com.llzzhh.study.interactionservice.service.impl;
 
-import com.llzzhh.study.dto.CommentDTO;
+import com.LLZZHH.study.dto.CommentDTO;
+import com.LLZZHH.study.dto.JwtUserDTO;
+import com.LLZZHH.study.vo.ResultVO;
 import com.llzzhh.study.interactionservice.entity.Comment;
 import com.llzzhh.study.interactionservice.feign.UserFeign;
 import com.llzzhh.study.interactionservice.mapper.CommentMapper;
@@ -110,7 +112,7 @@ public class CommentServiceImpl implements CommentService {
                     .map(String::valueOf)
                     .collect(Collectors.joining(","));
 
-            com.llzzhh.study.vo.ResultVO<Map<Integer, Map<String, Object>>> result = userFeign.getUsersBatch(idsStr);
+            ResultVO<Map<Integer, Map<String, Object>>> result = userFeign.getUsersBatch(idsStr);
             if (result != null && result.getCode() == 200 && result.getData() != null) {
                 return result.getData();
             }
@@ -125,8 +127,8 @@ public class CommentServiceImpl implements CommentService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
-            if (principal instanceof com.llzzhh.study.dto.JwtUserDTO) {
-                return ((com.llzzhh.study.dto.JwtUserDTO) principal).getUid();
+            if (principal instanceof JwtUserDTO) {
+                return ((JwtUserDTO) principal).getUid();
             } else {
                 throw new SecurityException("用户信息格式不正确");
             }
