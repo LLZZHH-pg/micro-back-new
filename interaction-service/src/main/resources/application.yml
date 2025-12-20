@@ -2,21 +2,12 @@
 spring:
     application:
         name: interaction-service
+    config:
+        import: nacos:interaction-service-dev.yml
     cloud:
         nacos:
             discovery:
                 server-addr: localhost:8848
-    datasource:
-        url: jdbc:mysql://localhost:3306/micro-interaction?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-        username: root
-        password: Lzh20050318!
-        driver-class-name: com.mysql.cj.jdbc.Driver
-server:
-    port: 8104
-
-mybatis-plus:
-    configuration:
-        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-logging:
-    charset:
-        console: utf-8
+            config:
+                server-addr: localhost:8848
+                file-extension: yaml
