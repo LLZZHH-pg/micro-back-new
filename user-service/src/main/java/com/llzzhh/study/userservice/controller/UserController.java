@@ -1,14 +1,15 @@
 package com.llzzhh.study.userservice.controller;
-import com.LLZZHH.study.dto.JwtUserDTO;
+
 import com.llzzhh.study.userservice.entity.User;
 import com.LLZZHH.study.vo.ResultVO;
 import com.LLZZHH.study.dto.LoginDTO;
 import com.LLZZHH.study.dto.RegisterDTO;
 import com.llzzhh.study.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ public class UserController {
 
     private final UserService userService;
 
+
     @PostMapping("/auth/register")
     public ResultVO<String> register(@RequestBody RegisterDTO dto) {
         try {
@@ -35,26 +37,13 @@ public class UserController {
     @PostMapping("/auth/login")
     public ResultVO<String> login(@RequestBody LoginDTO dto) {
         try {
-            return ResultVO.ok(userService.login(dto));
+            String token = userService.login(dto);
+            return ResultVO.ok(token);
         } catch (Exception e) {
             return ResultVO.unauthorized(e.getMessage());
         }
     }
 
-    @GetMapping("/profile")
-    public ResultVO<JwtUserDTO> getProfile() {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null || auth.getPrincipal() == null) {
-                return ResultVO.unauthorized("用户未登录");
-            }
-            // 直接返回JwtUserDTO
-            JwtUserDTO user = (JwtUserDTO) auth.getPrincipal();
-            return ResultVO.ok(user);
-        } catch (Exception e) {
-            return ResultVO.serverError("获取用户信息失败");
-        }
-    }
     @GetMapping("/profile/byId")
     public ResultVO<Map<String, Object>> getUserProfileById(@RequestParam Integer userId) {
         try {

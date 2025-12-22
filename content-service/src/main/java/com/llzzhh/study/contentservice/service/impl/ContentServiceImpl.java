@@ -2,6 +2,7 @@ package com.llzzhh.study.contentservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.llzzhh.study.contentservice.feign.InteractionFeign;
 import com.llzzhh.study.contentservice.feign.UserFeign;
 import com.llzzhh.study.contentservice.service.ContentService;
@@ -11,11 +12,13 @@ import com.LLZZHH.study.dto.JwtUserDTO;
 import com.llzzhh.study.contentservice.entity.Content;
 import com.llzzhh.study.contentservice.mapper.ContentMapper;
 import com.LLZZHH.study.vo.ResultVO;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -36,6 +39,7 @@ public class ContentServiceImpl implements ContentService {
     private final ContentMapper contentMapper;
     private final InteractionFeign interactionFeign;
     private final UserFeign userFeign;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -257,17 +261,25 @@ public class ContentServiceImpl implements ContentService {
 
 
     private Integer getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof JwtUserDTO) {
-                // 从JwtUserDTO获取用户ID
-                return ((JwtUserDTO) principal).getUid();
-            } else {
-                throw new SecurityException("用户信息格式不正确");
-            }
+        ServletRequestAttributes attrs =
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attrs == null) {
+            throw new SecurityException("无法获取请求上下文");
         }
-        throw new SecurityException("用户未认证");
+        HttpServletRequest request = attrs.getRequest();
+        String userJson = request.getHeader("X-User-Info");
+        if (!StringUtils.hasText(userJson)) {
+            throw new SecurityException("用户未认证，请登录后再试");
+        }
+        try {
+            JwtUserDTO jwtUser = objectMapper.readValue(userJson, JwtUserDTO.class);
+            if (jwtUser.getUid() == null) {
+                throw new SecurityException("Token 中缺少用户ID");
+            }
+            return jwtUser.getUid();
+        } catch (Exception e) {
+            throw new SecurityException("解析用户信息失败", e);
+        }
     }
 
     private ContentDTO convertToDTO(Content content) {

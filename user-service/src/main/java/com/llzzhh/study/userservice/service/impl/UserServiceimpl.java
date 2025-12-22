@@ -14,13 +14,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +36,7 @@ public class UserServiceimpl implements UserService {
     private long jwtExpirationMs;
 
     private final UserMapper userMapper;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public String register(RegisterDTO dto) {
@@ -97,20 +101,25 @@ public class UserServiceimpl implements UserService {
     private String generateJwtToken(User user) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
 
-        // 创建JwtUserDTO
         JwtUserDTO jwtUser = new JwtUserDTO();
         jwtUser.setUid(user.getUid());
         jwtUser.setName(user.getName());
         jwtUser.setEmail(user.getEmail());
         jwtUser.setRole(user.getRole());
 
-        return Jwts.builder()
+        String jti = UUID.randomUUID().toString();
+        String token=Jwts.builder()
+                .setId(jti)
                 .setSubject(String.valueOf(user.getUid()))
                 .claim("user", jwtUser)  // 将用户信息存入JWT
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(key)
                 .compact();
+        String redisKey = "auth:token:" + jti;
+        redisTemplate.opsForValue().set(redisKey, token, Duration.ofMillis(jwtExpirationMs));
+
+        return token;
     }
 
     private boolean exists(SFunction<User, ?> column, String val) {
@@ -169,6 +178,7 @@ public class UserServiceimpl implements UserService {
         if (userIds == null || userIds.isEmpty()) {
             return new ArrayList<>();
         }
-        return userMapper.selectBatchIds(userIds);
+        LambdaQueryWrapper<User> wrapper = Wrappers.<User>lambdaQuery().in(User::getUid, userIds);
+        return userMapper.selectList(wrapper);
     }
 }
