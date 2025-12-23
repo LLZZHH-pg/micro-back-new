@@ -43,9 +43,7 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
 
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
             "/api/user/auth/register",
-            "/api/user/auth/login",
-            "/api/public/**",
-            "/api/upfile/**"
+            "/api/user/auth/login"
     );
 
     @Value("${jwt.secret}")
