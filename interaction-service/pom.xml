@@ -85,6 +85,9 @@
                     <source>23</source>
                     <target>23</target>
                     <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                     <!-- 配置 Lombok 注解处理器 -->
                     <annotationProcessorPaths>
                         <path>

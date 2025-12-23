@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "content-service")
 public interface ContentFeign {
 
-    @PostMapping("/api/user/content/updateLikes")
+    @PostMapping("/api/user/contents/updateLikes")
     ResultVO<Void> updateLikes(@RequestParam("contentId") String contentId,
                                @RequestParam("increment") int increment);
 }

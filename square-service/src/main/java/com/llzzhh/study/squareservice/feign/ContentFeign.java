@@ -13,7 +13,8 @@ public interface ContentFeign {
 
     @GetMapping("/api/user/contentsSquare")
     ResultVO<List<ContentDTO>> getContentsSquare(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam("userId") int userId
     );
 }

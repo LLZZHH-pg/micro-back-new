@@ -7,14 +7,14 @@ import java.util.List;
 
 public interface ContentService {
     List<ContentDTO> getContentsOrdered(int page, int size);
-    List<ContentDTO> getSquareContents(int page, int size);
+    List<ContentDTO> getSquareContents(int page, int size, int userId);
 
     void saveContent(ContentDTO dto);
     boolean deleteFile(String fileUrl);
 
-    void updateContentState(String id, String state);
-    void deleteContent(String id);
+    void updateContentState(String contentId, String state);
+    void deleteContent(String contentId);
     String uploadFile(MultipartFile file);
 
-    void updateLikes(String id, int increment);
+    void updateLikes(String contentId, int increment);
 }

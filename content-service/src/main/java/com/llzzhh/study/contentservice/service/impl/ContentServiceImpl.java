@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ContentServiceImpl implements ContentService {
 
     private final ContentMapper contentMapper;
@@ -53,13 +55,20 @@ public class ContentServiceImpl implements ContentService {
         int offset = (page - 1) * size;
 
         List<Content> contents = contentMapper.selectContentWithUserid(getCurrentUserId(),offset, size);
+
         return contents.stream()
-                .map(this::convertToDTO)
+                .map(content -> {
+                    // 检查当前用户是否点赞
+                    Boolean isLiked = interactionFeign
+                            .checkIsLiked(content.getContentId(), getCurrentUserId())
+                            .getData();
+                    return convertToDTO(content,isLiked);
+                })
                 .collect(Collectors.toList());
 
     }
     @Override
-    public List<ContentDTO> getSquareContents(int page, int size) {
+    public List<ContentDTO> getSquareContents(int page, int size, int userId) {
         int offset = (page - 1) * size;
 
         // 查询公开内容（仅public状态）
@@ -83,7 +92,11 @@ public class ContentServiceImpl implements ContentService {
                     return "normal".equals(userState);
                 })
                 .map(content -> {
-                    ContentDTO dto = convertToDTO(content);
+                    // 检查当前用户是否点赞
+                    Boolean isLiked = interactionFeign
+                            .checkIsLiked(content.getContentId(), userId)
+                            .getData();
+                    ContentDTO dto = convertToDTO(content,isLiked);
                     // 设置用户名
                     Map<String, Object> userInfo = usersMap.get(content.getUserId());
                     if (userInfo != null) {
@@ -119,22 +132,39 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public void saveContent(ContentDTO dto) {
         Content content = convertToEntity(dto);
-        content.setUserId(getCurrentUserId());
 
         try {
-            if (dto.getContentId() == null || dto.getContentId().trim().isEmpty()) {
-                // 新增：生成唯一ID和设置创建时间
+            if (content.getContentId() == null || content.getContentId().trim().isEmpty()) {
                 content.setContentId(UUID.randomUUID().toString());
                 content.setCreateTime(LocalDateTime.now());
                 contentMapper.insert(content);
             } else {
-                // 更新：使用现有ID
-                content.setContentId(dto.getContentId());
-                content.setCreateTime(LocalDateTime.now());
-                contentMapper.updateById(content);
+                Content existing = contentMapper.selectById(content.getContentId());
+                if (existing == null) {
+                    throw new IllegalArgumentException("更新失败：内容不存在");
+                }
+                if (!getCurrentUserId().equals(existing.getUserId())) {
+                    throw new SecurityException("无权限修改该内容");
+                }
+
+                LocalDateTime createTime = existing.getCreateTime() != null
+                        ? existing.getCreateTime()
+                        : LocalDateTime.now();
+
+                UpdateWrapper<Content> updateWrapper = new UpdateWrapper<>();
+                updateWrapper.eq("id", content.getContentId())
+                        .eq("uid", getCurrentUserId())
+                        .set("content", content.getContent())
+                        .set("state", content.getState())
+                        .set("time", createTime);
+
+                contentMapper.update(null, updateWrapper);
             }
             cleanUnusedImages(dto.getUploadedImages(), dto.getUsedImages());
-        } catch (Exception e) {
+        }catch (Exception e) {
+            if (e instanceof SecurityException || e instanceof IllegalArgumentException) {
+                throw e;
+            }
             throw new RuntimeException("保存内容失败: " + e.getMessage(), e);
         }
     }
@@ -167,29 +197,29 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void updateContentState(String id, String state) {
-        if (id == null || id.isBlank() || "undefined".equals(id) || "null".equals(id)) {
+    public void updateContentState(String contentId, String state) {
+        if (contentId == null || contentId.isBlank() || "undefined".equals(contentId) || "null".equals(contentId)) {
             throw new IllegalArgumentException("无效的内容ID");
         }
         try {
             UpdateWrapper<Content> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("id", id)
+            updateWrapper.eq("id", contentId)
                     .eq("uid", getCurrentUserId()) // 仅更新当前用户的内容
                     .set("state",state); // 直接在UpdateWrapper中设置要更新的字段
             contentMapper.update(null, updateWrapper);
         } catch (Exception e) {
-            throw new RuntimeException("更新内容失败: " + e.getMessage(), e);
+            throw new RuntimeException("更新状态失败: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void deleteContent(String id) { // 软删除：将状态改为delete
-        if (id == null || id.isBlank() || "undefined".equals(id) || "null".equals(id)) {
+    public void deleteContent(String contentId) { // 软删除：将状态改为delete
+        if (contentId == null || contentId.isBlank() || "undefined".equals(contentId) || "null".equals(contentId)) {
             throw new IllegalArgumentException("无效的内容ID");
         }
         try {
             UpdateWrapper<Content> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("id", id)
+            updateWrapper.eq("id", contentId)
                     .eq("uid", getCurrentUserId()) // 仅更新当前用户的内容
                     .set("state", "delete"); // 直接在UpdateWrapper中设置要更新的字段
             contentMapper.update(null, updateWrapper);
@@ -222,11 +252,11 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void updateLikes(String id, int increment) {
+    public void updateLikes(String contentId, int increment) {
         try {
-            contentMapper.updateLikes(id, increment);
+            contentMapper.updateLikes(contentId, increment);
         } catch (Exception e) {
-            throw new RuntimeException("更新点赞失败: " + e.getMessage(), e);
+            throw new RuntimeException("点赞失败: " + e.getMessage(), e);
         }
     }
 
@@ -282,7 +312,7 @@ public class ContentServiceImpl implements ContentService {
         }
     }
 
-    private ContentDTO convertToDTO(Content content) {
+    private ContentDTO convertToDTO(Content content ,Boolean isLiked) {
         ContentDTO dto = new ContentDTO();
         dto.setContentId(content.getContentId());
         dto.setUserId(content.getUserId());
@@ -290,6 +320,7 @@ public class ContentServiceImpl implements ContentService {
         dto.setState(content.getState());
         dto.setCreateTime(content.getCreateTime());
         dto.setLikes(content.getLikes());
+        dto.setIsLiked(isLiked != null ? isLiked : false);
 
         try {
             // 获取评论（第一页，前10条）
@@ -305,11 +336,7 @@ public class ContentServiceImpl implements ContentService {
                 dto.setComments(List.of());
             }
 
-            // 检查当前用户是否点赞
-            Boolean isLiked = interactionFeign
-                    .checkIsLiked(content.getContentId(), getCurrentUserId())
-                    .getData();
-            dto.setIsLiked(isLiked != null ? isLiked : false);
+
         } catch (Exception e) {
             // 如果调用失败，设置为默认值
             dto.setComments(List.of());
@@ -324,10 +351,9 @@ public class ContentServiceImpl implements ContentService {
     private Content convertToEntity(ContentDTO dto) {
         Content content = new Content();
         content.setContentId(dto.getContentId());
-        content.setUserId(dto.getUserId());
+        content.setUserId(dto.getUserId());//不要用这个id
         content.setContent(dto.getContent());
         content.setState(dto.getState());
-        content.setCreateTime(dto.getCreateTime());
         return content;
     }
 }

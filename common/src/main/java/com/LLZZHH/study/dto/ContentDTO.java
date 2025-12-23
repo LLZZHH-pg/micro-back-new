@@ -16,7 +16,6 @@ public class ContentDTO {
     private Integer likes;
     private Boolean isLiked;
 
-    private String commentText;
     private List<CommentDTO> comments;
 
     private List<String> uploadedImages;

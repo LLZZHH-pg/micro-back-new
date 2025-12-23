@@ -25,8 +25,8 @@ public class InteractionController {
         return ResultVO.ok(null);
     }
     @PostMapping("/comment")
-    public ResultVO<Void> commentContent(@RequestBody ContentDTO contentDTO) {
-        commentService.commentContent(contentDTO.getContentId(), contentDTO.getCommentText());
+    public ResultVO<Void> commentContent(@RequestBody CommentDTO commentDTO) {
+        commentService.commentContent(commentDTO.getContentId(), commentDTO.getCommentText());
         return ResultVO.ok(null);
     }
 

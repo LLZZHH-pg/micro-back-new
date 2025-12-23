@@ -119,7 +119,11 @@ public class UserServiceimpl implements UserService {
                 .signWith(key)
                 .compact();
         String redisKey = "auth:token:" + jti;
-        redisTemplate.opsForValue().set(redisKey, token, Duration.ofMillis(jwtExpirationMs));
+        try {
+            redisTemplate.opsForValue().set(redisKey, token, Duration.ofMillis(jwtExpirationMs));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return token;
     }

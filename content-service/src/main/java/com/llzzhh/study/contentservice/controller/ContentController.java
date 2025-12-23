@@ -25,21 +25,45 @@ public class ContentController {
     // 保存内容
     @PostMapping("/contents")
     public ResultVO<Void> saveContent(@RequestBody ContentDTO contentDTO) {
-        contentService.saveContent(contentDTO);
-        return ResultVO.ok(null);
+        try {
+            contentService.saveContent(contentDTO);
+            return ResultVO.ok(null);
+        } catch (SecurityException e) {
+            return ResultVO.forbidden(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResultVO.fail(e.getMessage());
+        } catch (Exception e) {
+            return ResultVO.serverError(e.getMessage());
+        }
     }
 
     @PostMapping("/contents/state")
     public ResultVO<Void> updateState(@RequestBody ContentDTO contentDTO) {
-        contentService.updateContentState(contentDTO.getContentId(), contentDTO.getState());
-        return ResultVO.ok(null);
+        try {
+            contentService.updateContentState(contentDTO.getContentId(), contentDTO.getState());
+            return ResultVO.ok(null);
+        } catch (SecurityException e) {
+            return ResultVO.forbidden(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResultVO.fail(e.getMessage());
+        } catch (Exception e) {
+            return ResultVO.serverError(e.getMessage());
+        }
     }
 
     // 删除内容
     @PostMapping("/contents/delete")
     public ResultVO<Void> deleteContent(@RequestBody ContentDTO contentDTO) {
-        contentService.deleteContent(contentDTO.getContentId());
-        return ResultVO.ok(null);
+        try {
+            contentService.deleteContent(contentDTO.getContentId());
+            return ResultVO.ok(null);
+        } catch (SecurityException e) {
+            return ResultVO.forbidden(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResultVO.fail(e.getMessage());
+        } catch (Exception e) {
+            return ResultVO.serverError(e.getMessage());
+        }
     }
 
     @PostMapping("/contents/updateLikes")
@@ -55,8 +79,8 @@ public class ContentController {
     }
 
     @GetMapping("/contentsSquare")
-    public ResultVO<List<ContentDTO>> getContentsSquare(@RequestParam (defaultValue = "1") int page , @RequestParam (defaultValue = "10") int pageSize) {
-        return ResultVO.ok(contentService.getSquareContents(page, pageSize));
+    public ResultVO<List<ContentDTO>> getContentsSquare(@RequestParam (defaultValue = "1") int page , @RequestParam (defaultValue = "10") int pageSize,@RequestParam int userId) {
+        return ResultVO.ok(contentService.getSquareContents(page, pageSize, userId));
     }
 
 }

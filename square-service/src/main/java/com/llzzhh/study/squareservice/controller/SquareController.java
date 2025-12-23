@@ -18,9 +18,10 @@ import java.util.List;
 
 public class SquareController {
     private final SquareService contentService;
+    private final SquareService squareService;
 
     @GetMapping("/contentsSquare")
     public ResultVO<List<ContentDTO>> getContentsSquare(@RequestParam(defaultValue = "1") int page , @RequestParam (defaultValue = "10") int pageSize) {
-        return ResultVO.ok(contentService.getContentsOrderedSquare(page, pageSize));
+        return ResultVO.ok(squareService.getContentsOrderedSquare(page, pageSize));
     }
 }
