@@ -8,7 +8,6 @@
         <version>1.0-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.LLZZHH.study</groupId>
     <artifactId>interaction-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>interaction-service</name>
