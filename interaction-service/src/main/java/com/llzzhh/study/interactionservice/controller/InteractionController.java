@@ -24,8 +24,11 @@ public class InteractionController {
         likeService.likeContent(contentDTO.getContentId());
         return ResultVO.ok(null);
     }
+
+    // 核心修复：只传2个参数，匹配Service接口定义（userId自动从请求头获取）
     @PostMapping("/comment")
     public ResultVO<Void> commentContent(@RequestBody CommentDTO commentDTO) {
+        // 只传contentId和commentText，userId由Service自动获取，无需手动传！
         commentService.commentContent(commentDTO.getContentId(), commentDTO.getCommentText());
         return ResultVO.ok(null);
     }
@@ -36,7 +39,7 @@ public class InteractionController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        // 获取分页评论
+        // 获取分页评论（匹配Service的参数：contentId, page, size）
         List<CommentDTO> comments = commentService.listCommentsByContentId(contentId, page, size);
 
         // 获取评论总数
