@@ -1,4 +1,10 @@
 
+jwt:
+  # 开发默认密钥（请在生产环境通过配置中心或环境变量替换）
+  secret: my_dev_jwt_secret_key_should_be_replaced_in_prod_2026
+  # 过期时间（毫秒），示例：1小时
+  expiration: 3600000
+
 spring:
     application:
         name: interaction-service

@@ -6,7 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient; // 新�
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@EnableDiscoveryClient // 新增：让服务注册到Nacos，同时发现其他服务
+@EnableDiscoveryClient
 @EnableFeignClients(basePackages = {
         "com.llzzhh.study.userservice", // 原有业务包（保留，确保本地Bean正常扫描）
         "feign" // 新增：扫描feign根包，识别AdminInteractionFeignClient接口

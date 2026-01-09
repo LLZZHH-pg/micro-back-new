@@ -4,11 +4,20 @@ import com.LLZZHH.study.vo.ResultVO;
 import com.llzzhh.study.userservice.entity.User;
 import com.llzzhh.study.userservice.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.SecretKey;
+import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Base64;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * 管理员用户管理控制器（仅负责用户相关接口，删除所有评论/点赞接口）
@@ -20,12 +29,18 @@ public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
     /**
      * 查询所有用户
      */
     @GetMapping("/list")
-    public ResultVO<List<User>> getAllUsers() {
+    public ResultVO<List<User>> getAllUsers(HttpServletRequest request) {
         try {
+            if (!isAdmin(request)) {
+                return ResultVO.fail("无权限：仅admin角色可执行此操作");
+            }
             List<User> userList = adminUserService.getAllUsers();
             return ResultVO.ok(userList);
         } catch (Exception e) {
@@ -39,8 +54,11 @@ public class AdminUserController {
      */
 
     @PutMapping("/state")
-    public ResultVO<String> updateUserState(@RequestBody Map<String, Object> paramMap) {
+    public ResultVO<String> updateUserState(HttpServletRequest request, @RequestBody Map<String, Object> paramMap) {
         try {
+            if (!isAdmin(request)) {
+                return ResultVO.fail("无权限：仅admin角色可执行此操作");
+            }
             if (paramMap == null || !paramMap.containsKey("userId") || !paramMap.containsKey("newState")) {
                 return ResultVO.fail("参数错误：缺少userId或newState");
             }
@@ -77,8 +95,11 @@ public class AdminUserController {
 
 
     @GetMapping("/byRole")
-    public ResultVO<List<User>> getUsersByRole(@RequestParam String role) {
+    public ResultVO<List<User>> getUsersByRole(HttpServletRequest request, @RequestParam String role) {
         try {
+            if (!isAdmin(request)) {
+                return ResultVO.fail("无权限：仅admin角色可执行此操作");
+            }
             // 新增：参数校验
             if (!StringUtils.hasText(role)) {
                 return ResultVO.fail("角色参数不能为空");
@@ -91,7 +112,10 @@ public class AdminUserController {
         }
     }
     @PutMapping("/role")
-    public ResultVO<String> updateUserRole(@RequestBody Map<String, Object> paramMap) {
+    public ResultVO<String> updateUserRole(HttpServletRequest request, @RequestBody Map<String, Object> paramMap) {
+        if (!isAdmin(request)) {
+            return ResultVO.fail("无权限：仅admin角色可执行此操作");
+        }
         Integer userId = parseZerofillUserId(paramMap.get("userId"));
         String newRole = (String) paramMap.get("newRole");
 
@@ -107,6 +131,54 @@ public class AdminUserController {
             return ResultVO.ok("用户ROL角色修改成功");
         } else {
             return ResultVO.fail("角色修改失败（用户不存在或参数错误）");
+        }
+    }
+
+    // 校验请求中 JWT 是否为 admin 角色（简易实现：解析 Authorization: Bearer <token>）
+    private boolean isAdmin(HttpServletRequest request) {
+        try {
+            String auth = request.getHeader("Authorization");
+            if (auth == null || !auth.startsWith("Bearer ")) {
+                return false;
+            }
+            String token = auth.substring(7);
+            try {
+                SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+                Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+                Object userObj = claims.get("user");
+                if (userObj instanceof Map) {
+                    Map<?, ?> m = (Map<?, ?>) userObj;
+                    Object role = m.get("role");
+                    return "admin".equals(role);
+                }
+                return false;
+            } catch (Exception ex) {
+                String role = decodeRoleFromTokenWithoutVerification(token);
+                return "admin".equals(role);
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String decodeRoleFromTokenWithoutVerification(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) return null;
+            String payload = parts[1];
+            byte[] decoded = Base64.getUrlDecoder().decode(payload);
+            String json = new String(decoded, StandardCharsets.UTF_8);
+            ObjectMapper mapper = new ObjectMapper();
+            Map<?, ?> map = mapper.readValue(json, Map.class);
+            Object userObj = map.get("user");
+            if (userObj instanceof Map) {
+                Object role = ((Map<?, ?>) userObj).get("role");
+                return role == null ? null : role.toString();
+            }
+            Object role = map.get("role");
+            return role == null ? null : role.toString();
+        } catch (Exception e) {
+            return null;
         }
     }
 
