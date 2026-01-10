@@ -1,0 +1,24 @@
+server:
+    port: 8102
+spring:
+    datasource:
+        url: jdbc:mysql://localhost:3306/micro_content?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+        username: root
+        password: 123456
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    servlet:
+        multipart:
+            max-file-size: 20MB
+            max-request-size: 250MB
+            enabled: true
+app:
+    upload:
+        dir: D:/IDEA/java/micro-pictures
+        url-path: /api/upfile
+
+mybatis-plus:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+logging:
+    charset:
+        console: utf-8

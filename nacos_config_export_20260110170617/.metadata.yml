@@ -1,0 +1,25 @@
+metadata:
+- appName: ''
+  dataId: user-service-dev.yml
+  desc: ''
+  group: DEFAULT_GROUP
+  type: yaml
+- appName: ''
+  dataId: content-service-dev.yml
+  desc: ''
+  group: DEFAULT_GROUP
+  type: yaml
+- appName: ''
+  dataId: gateway-service-dev.yml
+  desc: ''
+  group: DEFAULT_GROUP
+  type: yaml
+- appName: ''
+  dataId: interaction-service-dev.yml
+  desc: ''
+  group: DEFAULT_GROUP
+  type: yaml
+- appName: ''
+  dataId: square-service-dev.yml
+  group: DEFAULT_GROUP
+  type: yaml

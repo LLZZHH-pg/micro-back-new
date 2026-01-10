@@ -1,0 +1,27 @@
+server:
+    port: 8101
+spring:
+    data:
+        redis:
+            host: localhost
+            port: 6379
+            # password: 12345678
+            password: ""
+    datasource:
+        url: jdbc:mysql://localhost:3306/micro_user?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+        username: root
+        password: 123456
+        driver-class-name: com.mysql.cj.jdbc.Driver
+    security:
+        user:
+            name: visitor
+            password: password
+mybatis-plus:
+    configuration:
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+jwt:
+    secret: your-secret-key-must-be-at-least-256-bits-long
+    expiration: 3600000
+logging:
+    charset:
+        console: utf-8

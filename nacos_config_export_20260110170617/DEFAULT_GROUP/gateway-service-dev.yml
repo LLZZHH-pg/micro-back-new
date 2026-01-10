@@ -1,0 +1,51 @@
+server:
+  port: 7395
+
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 12345678
+  cloud:
+    gateway:
+      routes:
+        # 用户服务
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/auth/**,/api/user/profile/**,/api/user/batch/**,/admin/user/**
+
+        # 内容服务
+        - id: content-service
+          uri: lb://content-service
+          predicates:
+            - Path=/api/user/contents/**, /api/user/upload
+
+        # 互动服务
+        - id: interaction-service
+          uri: lb://interaction-service
+          predicates:
+            - Path=/api/user/interaction/**,/api/admin/like/**,/api/admin/comment/**
+
+        # 广场服务
+        - id: square-service
+          uri: lb://square-service
+          predicates:
+            - Path=/api/user/contentsSquare
+
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+jwt:
+  secret: your-secret-key-must-be-at-least-256-bits-long
+  expiration: 60000
+
+logging:
+  charset:
+    console: utf-8
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: INFO

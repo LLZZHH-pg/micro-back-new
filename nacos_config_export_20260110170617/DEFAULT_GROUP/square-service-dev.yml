@@ -1,0 +1,5 @@
+server:
+    port: 8103
+logging:
+    charset:
+        console: utf-8
