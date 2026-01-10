@@ -113,12 +113,9 @@ public class ContentServiceImpl implements ContentService {
         }
 
         try {
-            // 将用户ID列表转换为逗号分隔的字符串
-            String idsStr = userIds.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
 
-            ResultVO<Map<Integer, Map<String, Object>>> result = userFeign.getUsersBatch(idsStr);
+
+            ResultVO<Map<Integer, Map<String, Object>>> result = userFeign.getUsersBatch(userIds);
             if (result != null && result.getCode() == 200 && result.getData() != null) {
                 return result.getData();
             }
